@@ -23,8 +23,24 @@ export class SelectionBarComponent implements OnChanges {
   @Output() yearViewBtnClicked: EventEmitter<void> = new EventEmitter<void>();
 
   constructor() { }
+ @Output() footerBarTxtClicked: EventEmitter<void> = new EventEmitter<void>();
+
+  footerBarTxt: string = 'Today';
+
+  constructor(private utilService: UtilService) { }
+
+
 
   ngOnChanges(changes: SimpleChanges): void {
+ if (changes.hasOwnProperty(OPTS)) {
+      this.opts = changes[OPTS].currentValue;
+
+      const {dateFormat, monthLabels, todayTxt} = this.opts;
+
+      const today = this.utilService.getToday();
+      this.footerBarTxt = todayTxt + (todayTxt.length > 0 ? SPACE_STR : EMPTY_STR) + 
+        this.utilService.formatDate(today, dateFormat, monthLabels);
+    }
     if (changes.hasOwnProperty(OPTS)) {
       this.opts = changes[OPTS].currentValue;
     }
@@ -47,7 +63,9 @@ export class SelectionBarComponent implements OnChanges {
       this.nextViewDisabled = changes[NEXT_VIEW_DISABLED].currentValue;
     }
   }
-
+  onFooterBarTxtClicked(): void {
+    this.footerBarTxtClicked.emit()
+  }
   onPrevNavigateBtnClicked(event: any): void {
     event.stopPropagation();
     this.opts.rtl ? this.nextNavigateBtnClicked.emit() : this.prevNavigateBtnClicked.emit();
